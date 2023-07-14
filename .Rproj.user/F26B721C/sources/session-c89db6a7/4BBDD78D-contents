@@ -1,0 +1,8 @@
+---
+title: "README"
+author: "Julia Schedler"
+date: "2023-07-14"
+output: html_document
+---
+
+The code to create the map is in "DavisMap.qmd". I will be working on turning my code into an easy-to-follow tutorial. 

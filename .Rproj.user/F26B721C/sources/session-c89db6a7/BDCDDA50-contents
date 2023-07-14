@@ -1,0 +1,166 @@
+## FPSAC
+
+FPSAC stands for "Formal Power Series and Algebraic Combinatorics". My partner was tasked with making a map for the conference. He asked for my help and here's what I came up with.
+
+## Yolo Data
+
+Many municipalities have Open Data portals which typically have the shapefiles needed to make maps-- roads, building footprints, city boundaries, etc.
+
+I started my project by downloading some street data from [Yolo County Open Data website](https://yodata-yolo.opendata.arcgis.com/). Then, I can use the sf pacakge to read that data into R and the ggplot2 package to visualize.
+
+```{r}
+## Load necessary packages
+library(sf)
+library(ggplot2)
+
+## Read in the data
+yolo <- sf::read_sf("Yolo_County_Street_Centerlines_Open_Data/Yolo_County_Street_Centerlines_Open_Data.shp")
+
+## Visualize the data
+ggplot(data = yolo) + geom_sf()
+```
+
+Unless you are quite familiar with maps of the county, you might not immediately know where this map corresponds to. If you search the name of a county on Google Maps, it should visualize the outline. This will give you a nice sanity check that you have the right data.
+
+[![A screenshot of the Yolo County boundary as visualized by Google Maps. Comparing this to the map we just made in R, it appears that the dense areas correspond to cities-- Davis, Woodland, and West Sacramento. This is because every line is represented with the same width, but there will be more lines in a smaller area within cities, since cities have more streets. ](images/yolo_county_google_maps.png)](https://goo.gl/maps/xiWAeWMoZTf5ub5B7)
+
+FPSAC is occurring in Davis. Can we zoom in on Davis? If we had the coordinates defining the boundary of Davis we could use sf::st_intersection to subset the
+
+\
+Since most of the FPSAC events will occur on the UC Davis campus, we should create a subset of this map that is "zoomed in" to just the part that the conference
+
+## UCD Data
+
+```{r}
+ucd <- st_transform(sf::read_sf("UC_Davis_Campus_Boundary/UC_Davis_Campus_Boundary.shp"), 
+                    st_crs(yolo))
+## filter to bulk of campus
+#ucd <- ucd[1,]
+
+ucd_bldgs <- st_transform(sf::read_sf("UC_Davis_Building_Footprints/UC_Davis_Building_Footprints.shp"), st_crs(yolo))
+
+#https://data-ucda.opendata.arcgis.com/datasets/ucda::uc-davis-roads-pathways/explore?location=38.536141%2C-121.755256%2C17.84
+ucd_paths <-  st_transform(sf::read_sf("UC_Davis_Roads_Pathways/UC_Davis_Roads_Pathways.shp"), st_crs(yolo))
+library(gghighlight)
+library(ggsflabel)
+library(ggspatial)
+```
+
+## Make the map!
+
+```{r}
+## zoom
+zoom <- st_bbox(ucd_bldgs)
+zoom[1] <- -121.7605
+zoom[2] <- 38.533
+zoom[3] <- -121.746
+zoom[4] <- 38.541
+
+
+
+FPSAC_bldg_info <- data.frame(ID = c(386, 1029, 1030, 972, 1036, 246, 968, 
+                                     1557), 
+                              name = c("Talks, Coffee Breaks, Ice Cream\n(Sciences Lecture Hall)", 
+                                        "Campbell \n Hall 🛏️", 
+                                        "Opening Reception\n (Wall Hall 🛏 )",
+                                        "Dorm Dining🍴\n(Tercero Services)", 
+                                        "Poster Sessions\n(Community Center)", 
+                                        "Banquet\n (Moss Patio)", 
+                                        "Workspace \n(Giedt Hall)", 
+                                        "Excursion Bus Pickup"))
+FPSAC_bldgs <- ucd_bldgs[FPSAC_bldg_info$ID,]
+FPSAC_bldgs$label <- FPSAC_bldg_info$name
+FPSAC_bldgs$plotid <- 1:nrow(FPSAC_bldgs)
+## get coords manually once, then paste label.x/label.y
+# plot(FPSAC_bldgs$geometry, col = "blue"); plot(yolo$geometry, add = T);
+# coords <- locator((nrow(FPSAC_bldgs)))
+# cat(coords$x, sep = ",")
+# cat(coords$y, sep = ",")
+FPSAC_bldgs$label.x <- c(-121.758,-121.76,-121.7579,-121.7575,-121.7508,-121.7474,-121.7574,-121.7539)
+FPSAC_bldgs$label.y <- c(38.54007,38.53512,38.53386,38.53694,38.54011,38.5359,38.53802,38.5405)
+
+# devtools::install_github("yutannihilation/ggsflabel")
+
+ucd_bldgs$id <- 1:nrow(ucd_bldgs)
+
+segment.ends <- data.frame(st_coordinates(st_centroid(FPSAC_bldgs$geometry)))
+segment.ends[8,] <- c(-121.7534, 38.53919)
+segment.ends[6,] <- c(-121.7482,38.53532)
+
+## get ids from visual inspection of geom_sf_text(data = ucd_bldgs, aes(label = id),size = 4)
+ids <- c(436, 588, 717, 1153, 1155, 1156, 436, 347, 333, 685, 1127, 1033, 1003, 623, 194, 920, 1112, 1104, 659, 603, 1557, 1133, 1034, 1134, 667, 975, 1004, 921, 605, 526, 576, 1031, 919, 450, 246, 1176, 425, 598, 566, 616)
+bldg_labels <- ucd_bldgs[ids,]
+bldg_labels$name <- bldg_labels$arcgisDB12
+bldg_labels$name[10] <- "Academic\nSurge"
+bldg_labels$name[13] <- "Earth &\n Physical\nSciences"
+bldg_labels$name[19] <- "Mathematical\nSciences"
+bldg_labels$name[21] <- "Teaching &\n Learning\n Complex"
+bldg_labels$name[36] <- "Hyatt Place\n UC Davis"
+bldg_labels$name[38] <- ""
+bldg_labels$name[40] <- "Physics\nBuilding"
+bldg_labels$name[25] <-"Facilities\nShops"
+bldg_labels$name[11] <- "Shields\nLibrary"
+bldg_labels$name[8] <- "Sciences Lab \n Building"
+bldg_labels$name[2] <- "Bainer\nHall"
+bldg_labels$name[30] <- "Chemistry\nAnnex"
+g<- ggplot() + 
+  geom_sf(data = ucd, fill = "#ede4b980") + 
+  geom_sf(data = ucd_paths, fill = "#c4ee90", col = "#FFFFFF00") +
+
+  geom_sf(data = ucd_bldgs, fill = "lightgrey") +
+
+  geom_sf(data = yolo, lty = 2, col = "brown", lwd = 1.2) +
+  geom_sf(data = FPSAC_bldgs[c(1:5, 7),], fill = "#287AB8")+ 
+    geom_spatial_segment(data = FPSAC_bldgs, aes(x = label.x, y = label.y, 
+                                              xend = segment.ends$X, 
+                                              yend = segment.ends$Y), lwd = 1.2)+
+  geom_sf_text(data = FPSAC_bldgs, aes(y = 38.5392, x =-121.7534, label = "🚌"), 
+               size = 10)+
+    geom_sf_text(data = bldg_labels, aes(label = name), 
+               size = 3) +
+  ggsflabel::geom_sf_label(data = FPSAC_bldgs, aes(label = FPSAC_bldgs$label, x = label.x, y = label.y)) + 
+  coord_sf(xlim = zoom[c(1,3)], ylim = zoom[c(2,4)]) +
+  theme_bw() + 
+      #geom_sf_text(data = ucd_bldgs, aes(label = id),size = 4)+
+  #geom_sf_label(data = FPSAC_bldgs, aes(label = FPSAC_bldgs$label)) +
+  annotation_north_arrow(which_north = "grid", location = "br") +
+  annotation_scale(location =  "tl", text_cex = 1) +
+  ylab("Latitude") + xlab("Longitude");g
+```
+
+## Version of map for high quality image export
+
+```{r}
+library(ggplot2)
+library(ragg)
+g<- ggplot() + 
+  geom_sf(data = ucd, fill = "#ede4b980") + 
+  geom_sf(data = ucd_paths, fill = "#c4ee90", col = "#FFFFFF00") +
+
+  geom_sf(data = ucd_bldgs, fill = "lightgrey") +
+
+  geom_sf(data = yolo, lty = 2, col = "brown", lwd = 1.2) +
+  geom_sf(data = FPSAC_bldgs[c(1:5, 7),], fill = "#287AB8")+ 
+    geom_spatial_segment(data = FPSAC_bldgs, aes(x = label.x, y = label.y, 
+                                              xend = segment.ends$X, 
+                                              yend = segment.ends$Y), lwd = 1.2)+
+  geom_sf_text(data = FPSAC_bldgs, aes(y = 38.5392, x =-121.7534, label = "🚌"), 
+               size = 10)+
+    geom_sf_text(data = bldg_labels, aes(label = name), 
+               size = 5, fontface = "bold") +
+  ggsflabel::geom_sf_label(data = FPSAC_bldgs, aes(label = FPSAC_bldgs$label, x = label.x, y = label.y), size = 7) + 
+  coord_sf(xlim = zoom[c(1,3)], ylim = zoom[c(2,4)]) +
+  theme_bw() + 
+      #geom_sf_text(data = ucd_bldgs, aes(label = id),size = 4)+
+  #geom_sf_label(data = FPSAC_bldgs, aes(label = FPSAC_bldgs$label)) +
+  annotation_north_arrow(which_north = "grid", location = "br", height = unit(2.2, "cm")) +
+  annotation_scale(location =  "tl", text_cex = 1.5) +
+  ylab("Latitude") + xlab("Longitude") + 
+  theme(axis.text = element_text(size = 15), axis.title = element_text(size =20));g
+## NOTE: run "g" on console to then ggsave the best quality image, not in chunk output in Rstudio
+ggsave("FPSAC_map_23.png", device = agg_tiff)
+```
+
+Here's how it looks when you open it using the computer's image viewer:
+
+![The final FPSAC map!](FPSAC_map_23.png)

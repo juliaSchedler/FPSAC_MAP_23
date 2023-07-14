@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>davismap</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="DavisMap_files/libs/clipboard/clipboard.min.js"></script>
+<script src="DavisMap_files/libs/quarto-html/quarto.js"></script>
+<script src="DavisMap_files/libs/quarto-html/popper.min.js"></script>
+<script src="DavisMap_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="DavisMap_files/libs/quarto-html/anchor.min.js"></script>
+<link href="DavisMap_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="DavisMap_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="DavisMap_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="DavisMap_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="DavisMap_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+
+
+<section id="yolo-data" class="level2">
+<h2 class="anchored" data-anchor-id="yolo-data">Yolo Data</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>yolo <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">read_sf</span>(<span class="st">"Yolo_County_Street_Centerlines_Open_Data/Yolo_County_Street_Centerlines_Open_Data.shp"</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#plot(yolo$geometry)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="ucd-data" class="level2">
+<h2 class="anchored" data-anchor-id="ucd-data">UCD Data</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ucd <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(sf<span class="sc">::</span><span class="fu">read_sf</span>(<span class="st">"UC_Davis_Campus_Boundary/UC_Davis_Campus_Boundary.shp"</span>), </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">st_crs</span>(yolo))</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="do">## filter to bulk of campus</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#ucd &lt;- ucd[1,]</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>ucd_bldgs <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(sf<span class="sc">::</span><span class="fu">read_sf</span>(<span class="st">"UC_Davis_Building_Footprints/UC_Davis_Building_Footprints.shp"</span>), <span class="fu">st_crs</span>(yolo))</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#https://data-ucda.opendata.arcgis.com/datasets/ucda::uc-davis-roads-pathways/explore?location=38.536141%2C-121.755256%2C17.84</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>ucd_paths <span class="ot">&lt;-</span>  <span class="fu">st_transform</span>(sf<span class="sc">::</span><span class="fu">read_sf</span>(<span class="st">"UC_Davis_Roads_Pathways/UC_Davis_Roads_Pathways.shp"</span>), <span class="fu">st_crs</span>(yolo))</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gghighlight)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: ggplot2</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggsflabel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'ggsflabel'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:ggplot2':
+
+    geom_sf_label, geom_sf_text, StatSfCoordinates</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggspatial)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="make-the-map" class="level2">
+<h2 class="anchored" data-anchor-id="make-the-map">Make the map!</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="do">## zoom</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>zoom <span class="ot">&lt;-</span> <span class="fu">st_bbox</span>(ucd_bldgs)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>zoom[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">121.7605</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>zoom[<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="fl">38.533</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>zoom[<span class="dv">3</span>] <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">121.746</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>zoom[<span class="dv">4</span>] <span class="ot">&lt;-</span> <span class="fl">38.541</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>FPSAC_bldg_info <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">ID =</span> <span class="fu">c</span>(<span class="dv">386</span>, <span class="dv">1029</span>, <span class="dv">1030</span>, <span class="dv">972</span>, <span class="dv">1036</span>, <span class="dv">246</span>, <span class="dv">968</span>, </span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>                                     <span class="dv">1557</span>), </span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>                              <span class="at">name =</span> <span class="fu">c</span>(<span class="st">"Talks, Coffee Breaks, Ice Cream</span><span class="sc">\n</span><span class="st">(Sciences Lecture Hall)"</span>, </span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"Campbell </span><span class="sc">\n</span><span class="st"> Hall 🛏️"</span>, </span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"Opening Reception</span><span class="sc">\n</span><span class="st"> (Wall Hall 🛏 )"</span>,</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"Dorm Dining🍴</span><span class="sc">\n</span><span class="st">(Tercero Services)"</span>, </span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"Poster Sessions</span><span class="sc">\n</span><span class="st">(Community Center)"</span>, </span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"Banquet</span><span class="sc">\n</span><span class="st"> (Moss Patio)"</span>, </span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"Workspace </span><span class="sc">\n</span><span class="st">(Giedt Hall)"</span>, </span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"Excursion Bus Pickup"</span>))</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>FPSAC_bldgs <span class="ot">&lt;-</span> ucd_bldgs[FPSAC_bldg_info<span class="sc">$</span>ID,]</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>FPSAC_bldgs<span class="sc">$</span>label <span class="ot">&lt;-</span> FPSAC_bldg_info<span class="sc">$</span>name</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>FPSAC_bldgs<span class="sc">$</span>plotid <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(FPSAC_bldgs)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="do">## get coords manually once, then paste label.x/label.y</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(FPSAC_bldgs$geometry, col = "blue"); plot(yolo$geometry, add = T);</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="co"># coords &lt;- locator((nrow(FPSAC_bldgs)))</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a><span class="co"># cat(coords$x, sep = ",")</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a><span class="co"># cat(coords$y, sep = ",")</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>FPSAC_bldgs<span class="sc">$</span>label.x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">121.758</span>,<span class="sc">-</span><span class="fl">121.76</span>,<span class="sc">-</span><span class="fl">121.7579</span>,<span class="sc">-</span><span class="fl">121.7575</span>,<span class="sc">-</span><span class="fl">121.7508</span>,<span class="sc">-</span><span class="fl">121.7474</span>,<span class="sc">-</span><span class="fl">121.7574</span>,<span class="sc">-</span><span class="fl">121.7539</span>)</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>FPSAC_bldgs<span class="sc">$</span>label.y <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">38.54007</span>,<span class="fl">38.53512</span>,<span class="fl">38.53386</span>,<span class="fl">38.53694</span>,<span class="fl">38.54011</span>,<span class="fl">38.5359</span>,<span class="fl">38.53802</span>,<span class="fl">38.5405</span>)</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a><span class="co"># devtools::install_github("yutannihilation/ggsflabel")</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>ucd_bldgs<span class="sc">$</span>id <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(ucd_bldgs)</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>segment.ends <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">st_coordinates</span>(<span class="fu">st_centroid</span>(FPSAC_bldgs<span class="sc">$</span>geometry)))</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>segment.ends[<span class="dv">8</span>,] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">121.7534</span>, <span class="fl">38.53919</span>)</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>segment.ends[<span class="dv">6</span>,] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">121.7482</span>,<span class="fl">38.53532</span>)</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a><span class="do">## get ids from visual inspection of geom_sf_text(data = ucd_bldgs, aes(label = id),size = 4)</span></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>ids <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">436</span>, <span class="dv">588</span>, <span class="dv">717</span>, <span class="dv">1153</span>, <span class="dv">1155</span>, <span class="dv">1156</span>, <span class="dv">436</span>, <span class="dv">347</span>, <span class="dv">333</span>, <span class="dv">685</span>, <span class="dv">1127</span>, <span class="dv">1033</span>, <span class="dv">1003</span>, <span class="dv">623</span>, <span class="dv">194</span>, <span class="dv">920</span>, <span class="dv">1112</span>, <span class="dv">1104</span>, <span class="dv">659</span>, <span class="dv">603</span>, <span class="dv">1557</span>, <span class="dv">1133</span>, <span class="dv">1034</span>, <span class="dv">1134</span>, <span class="dv">667</span>, <span class="dv">975</span>, <span class="dv">1004</span>, <span class="dv">921</span>, <span class="dv">605</span>, <span class="dv">526</span>, <span class="dv">576</span>, <span class="dv">1031</span>, <span class="dv">919</span>, <span class="dv">450</span>, <span class="dv">246</span>, <span class="dv">1176</span>, <span class="dv">425</span>, <span class="dv">598</span>, <span class="dv">566</span>, <span class="dv">616</span>)</span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>bldg_labels <span class="ot">&lt;-</span> ucd_bldgs[ids,]</span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>bldg_labels<span class="sc">$</span>name <span class="ot">&lt;-</span> bldg_labels<span class="sc">$</span>arcgisDB12</span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>bldg_labels<span class="sc">$</span>name[<span class="dv">10</span>] <span class="ot">&lt;-</span> <span class="st">"Academic</span><span class="sc">\n</span><span class="st">Surge"</span></span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>bldg_labels<span class="sc">$</span>name[<span class="dv">13</span>] <span class="ot">&lt;-</span> <span class="st">"Earth &amp;</span><span class="sc">\n</span><span class="st"> Physical</span><span class="sc">\n</span><span class="st">Sciences"</span></span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>bldg_labels<span class="sc">$</span>name[<span class="dv">19</span>] <span class="ot">&lt;-</span> <span class="st">"Mathematical</span><span class="sc">\n</span><span class="st">Sciences"</span></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>bldg_labels<span class="sc">$</span>name[<span class="dv">21</span>] <span class="ot">&lt;-</span> <span class="st">"Teaching &amp;</span><span class="sc">\n</span><span class="st"> Learning</span><span class="sc">\n</span><span class="st"> Complex"</span></span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>bldg_labels<span class="sc">$</span>name[<span class="dv">36</span>] <span class="ot">&lt;-</span> <span class="st">"Hyatt Place</span><span class="sc">\n</span><span class="st"> UC Davis"</span></span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>bldg_labels<span class="sc">$</span>name[<span class="dv">38</span>] <span class="ot">&lt;-</span> <span class="st">""</span></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>bldg_labels<span class="sc">$</span>name[<span class="dv">40</span>] <span class="ot">&lt;-</span> <span class="st">"Physics</span><span class="sc">\n</span><span class="st">Building"</span></span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>bldg_labels<span class="sc">$</span>name[<span class="dv">25</span>] <span class="ot">&lt;-</span><span class="st">"Facilities</span><span class="sc">\n</span><span class="st">Shops"</span></span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>bldg_labels<span class="sc">$</span>name[<span class="dv">11</span>] <span class="ot">&lt;-</span> <span class="st">"Shields</span><span class="sc">\n</span><span class="st">Library"</span></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>bldg_labels<span class="sc">$</span>name[<span class="dv">8</span>] <span class="ot">&lt;-</span> <span class="st">"Sciences Lab </span><span class="sc">\n</span><span class="st"> Building"</span></span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>bldg_labels<span class="sc">$</span>name[<span class="dv">2</span>] <span class="ot">&lt;-</span> <span class="st">"Bainer</span><span class="sc">\n</span><span class="st">Hall"</span></span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>bldg_labels<span class="sc">$</span>name[<span class="dv">30</span>] <span class="ot">&lt;-</span> <span class="st">"Chemistry</span><span class="sc">\n</span><span class="st">Annex"</span></span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>g<span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> ucd, <span class="at">fill =</span> <span class="st">"#ede4b980"</span>) <span class="sc">+</span> </span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> ucd_paths, <span class="at">fill =</span> <span class="st">"#c4ee90"</span>, <span class="at">col =</span> <span class="st">"#FFFFFF00"</span>) <span class="sc">+</span></span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> ucd_bldgs, <span class="at">fill =</span> <span class="st">"lightgrey"</span>) <span class="sc">+</span></span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> yolo, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"brown"</span>, <span class="at">lwd =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> FPSAC_bldgs[<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">7</span>),], <span class="at">fill =</span> <span class="st">"#287AB8"</span>)<span class="sc">+</span> </span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_spatial_segment</span>(<span class="at">data =</span> FPSAC_bldgs, <span class="fu">aes</span>(<span class="at">x =</span> label.x, <span class="at">y =</span> label.y, </span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a>                                              <span class="at">xend =</span> segment.ends<span class="sc">$</span>X, </span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>                                              <span class="at">yend =</span> segment.ends<span class="sc">$</span>Y), <span class="at">lwd =</span> <span class="fl">1.2</span>)<span class="sc">+</span></span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf_text</span>(<span class="at">data =</span> FPSAC_bldgs, <span class="fu">aes</span>(<span class="at">y =</span> <span class="fl">38.5392</span>, <span class="at">x =</span><span class="sc">-</span><span class="fl">121.7534</span>, <span class="at">label =</span> <span class="st">"🚌"</span>), </span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a>               <span class="at">size =</span> <span class="dv">10</span>)<span class="sc">+</span></span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_sf_text</span>(<span class="at">data =</span> bldg_labels, <span class="fu">aes</span>(<span class="at">label =</span> name), </span>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>               <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a>  ggsflabel<span class="sc">::</span><span class="fu">geom_sf_label</span>(<span class="at">data =</span> FPSAC_bldgs, <span class="fu">aes</span>(<span class="at">label =</span> FPSAC_bldgs<span class="sc">$</span>label, <span class="at">x =</span> label.x, <span class="at">y =</span> label.y)) <span class="sc">+</span> </span>
+<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_sf</span>(<span class="at">xlim =</span> zoom[<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">3</span>)], <span class="at">ylim =</span> zoom[<span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">4</span>)]) <span class="sc">+</span></span>
+<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span> </span>
+<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a>      <span class="co">#geom_sf_text(data = ucd_bldgs, aes(label = id),size = 4)+</span></span>
+<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a>  <span class="co">#geom_sf_label(data = FPSAC_bldgs, aes(label = FPSAC_bldgs$label)) +</span></span>
+<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotation_north_arrow</span>(<span class="at">which_north =</span> <span class="st">"grid"</span>, <span class="at">location =</span> <span class="st">"br"</span>) <span class="sc">+</span></span>
+<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotation_scale</span>(<span class="at">location =</span>  <span class="st">"tl"</span>, <span class="at">text_cex =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb10-77"><a href="#cb10-77" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Latitude"</span>) <span class="sc">+</span> <span class="fu">xlab</span>(<span class="st">"Longitude"</span>);g</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Use of `FPSAC_bldgs$label` is discouraged.
+ℹ Use `label` instead.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Assuming `crs = 4326` in stat_spatial_segment()</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in st_point_on_surface.sfc(data$geometry): st_point_on_surface may not
+give correct results for longitude/latitude data</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in st_point_on_surface.sfc(data$geometry): st_point_on_surface may not
+give correct results for longitude/latitude data
+
+Warning in st_point_on_surface.sfc(data$geometry): st_point_on_surface may not
+give correct results for longitude/latitude data</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="DavisMap_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="version-of-map-for-high-quality-image-export" class="level2">
+<h2 class="anchored" data-anchor-id="version-of-map-for-high-quality-image-export">Version of map for high quality image export</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ragg)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>g<span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> ucd, <span class="at">fill =</span> <span class="st">"#ede4b980"</span>) <span class="sc">+</span> </span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> ucd_paths, <span class="at">fill =</span> <span class="st">"#c4ee90"</span>, <span class="at">col =</span> <span class="st">"#FFFFFF00"</span>) <span class="sc">+</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> ucd_bldgs, <span class="at">fill =</span> <span class="st">"lightgrey"</span>) <span class="sc">+</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> yolo, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"brown"</span>, <span class="at">lwd =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> FPSAC_bldgs[<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">7</span>),], <span class="at">fill =</span> <span class="st">"#287AB8"</span>)<span class="sc">+</span> </span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_spatial_segment</span>(<span class="at">data =</span> FPSAC_bldgs, <span class="fu">aes</span>(<span class="at">x =</span> label.x, <span class="at">y =</span> label.y, </span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>                                              <span class="at">xend =</span> segment.ends<span class="sc">$</span>X, </span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>                                              <span class="at">yend =</span> segment.ends<span class="sc">$</span>Y), <span class="at">lwd =</span> <span class="fl">1.2</span>)<span class="sc">+</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf_text</span>(<span class="at">data =</span> FPSAC_bldgs, <span class="fu">aes</span>(<span class="at">y =</span> <span class="fl">38.5392</span>, <span class="at">x =</span><span class="sc">-</span><span class="fl">121.7534</span>, <span class="at">label =</span> <span class="st">"🚌"</span>), </span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>               <span class="at">size =</span> <span class="dv">10</span>)<span class="sc">+</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_sf_text</span>(<span class="at">data =</span> bldg_labels, <span class="fu">aes</span>(<span class="at">label =</span> name), </span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>               <span class="at">size =</span> <span class="dv">5</span>, <span class="at">fontface =</span> <span class="st">"bold"</span>) <span class="sc">+</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>  ggsflabel<span class="sc">::</span><span class="fu">geom_sf_label</span>(<span class="at">data =</span> FPSAC_bldgs, <span class="fu">aes</span>(<span class="at">label =</span> FPSAC_bldgs<span class="sc">$</span>label, <span class="at">x =</span> label.x, <span class="at">y =</span> label.y), <span class="at">size =</span> <span class="dv">7</span>) <span class="sc">+</span> </span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_sf</span>(<span class="at">xlim =</span> zoom[<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">3</span>)], <span class="at">ylim =</span> zoom[<span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">4</span>)]) <span class="sc">+</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span> </span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>      <span class="co">#geom_sf_text(data = ucd_bldgs, aes(label = id),size = 4)+</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>  <span class="co">#geom_sf_label(data = FPSAC_bldgs, aes(label = FPSAC_bldgs$label)) +</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotation_north_arrow</span>(<span class="at">which_north =</span> <span class="st">"grid"</span>, <span class="at">location =</span> <span class="st">"br"</span>, <span class="at">height =</span> <span class="fu">unit</span>(<span class="fl">2.2</span>, <span class="st">"cm"</span>)) <span class="sc">+</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotation_scale</span>(<span class="at">location =</span>  <span class="st">"tl"</span>, <span class="at">text_cex =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Latitude"</span>) <span class="sc">+</span> <span class="fu">xlab</span>(<span class="st">"Longitude"</span>) <span class="sc">+</span> </span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">15</span>), <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span><span class="dv">20</span>));g</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Use of `FPSAC_bldgs$label` is discouraged.
+ℹ Use `label` instead.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Assuming `crs = 4326` in stat_spatial_segment()</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in st_point_on_surface.sfc(data$geometry): st_point_on_surface may not
+give correct results for longitude/latitude data</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in st_point_on_surface.sfc(data$geometry): st_point_on_surface may not
+give correct results for longitude/latitude data
+
+Warning in st_point_on_surface.sfc(data$geometry): st_point_on_surface may not
+give correct results for longitude/latitude data</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="DavisMap_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="do">## </span><span class="al">NOTE</span><span class="do">: run "g" on console to then ggsave the best quality image, not in chunk output in Rstudio</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="st">"FPSAC_map_23.png"</span>, <span class="at">device =</span> agg_tiff)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Saving 7 x 5 in image</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Use of `FPSAC_bldgs$label` is discouraged.
+ℹ Use `label` instead.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Assuming `crs = 4326` in stat_spatial_segment()</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in st_point_on_surface.sfc(data$geometry): st_point_on_surface may not
+give correct results for longitude/latitude data
+
+Warning in st_point_on_surface.sfc(data$geometry): st_point_on_surface may not
+give correct results for longitude/latitude data
+
+Warning in st_point_on_surface.sfc(data$geometry): st_point_on_surface may not
+give correct results for longitude/latitude data</code></pre>
+</div>
+</div>
+<p>Here’s how it looks when you open it using the computer’s image viewer:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="FPSAC_map_23.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">The final FPSAC map!</figcaption>
+</figure>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

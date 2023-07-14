@@ -1,0 +1,23 @@
+"0","ucd <- st_transform(sf::read_sf(""UC_Davis_Campus_Boundary/UC_Davis_Campus_Boundary.shp""), "
+"0","                    st_crs(yolo))"
+"0","## filter to bulk of campus"
+"0","#ucd <- ucd[1,]"
+"0",""
+"0","ucd_bldgs <- st_transform(sf::read_sf(""UC_Davis_Building_Footprints/UC_Davis_Building_Footprints.shp""), st_crs(yolo))"
+"0",""
+"0","#https://data-ucda.opendata.arcgis.com/datasets/ucda::uc-davis-roads-pathways/explore?location=38.536141%2C-121.755256%2C17.84"
+"0","ucd_paths <-  st_transform(sf::read_sf(""UC_Davis_Roads_Pathways/UC_Davis_Roads_Pathways.shp""), st_crs(yolo))"
+"0","library(gghighlight)"
+"2","Loading required package: ggplot2
+"
+"0","library(ggsflabel)"
+"2","
+Attaching package: ‘ggsflabel’
+
+"
+"2","The following objects are masked from ‘package:ggplot2’:
+
+    geom_sf_label, geom_sf_text, StatSfCoordinates
+
+"
+"0","library(ggspatial)"

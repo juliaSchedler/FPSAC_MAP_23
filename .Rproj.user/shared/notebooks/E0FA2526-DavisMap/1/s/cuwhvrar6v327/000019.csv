@@ -1,0 +1,4 @@
+"0","## NOTE: run ""g"" on console to then ggsave the best quality image, not in chunk output in Rstudio
+ggsave(""FPSAC_map_23.png"", device = agg_tiff)
+"
+"2","[38;5;242mSaving 16.3 x 13.3 in image[39m"
