@@ -3,3 +3,7 @@
 A map for the Formal Power Series and Algebraic Combinatorics conference in Davis, CA.
 
 I plan to make this into a spatial mapping in R tutorial, so this is a work in progress.
+
+Here's the final map!
+
+![](images/FPSAC_23_Final.png)
